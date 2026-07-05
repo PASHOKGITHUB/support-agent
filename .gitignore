@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+/client/node_modules/
+/server/node_modules/
+
+# Production builds
+/client/.next/
+/client/out/
+/server/dist/
+
+# Local env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+/server/.env
+
+# Diagnostic / temp files
+validate_e2e_api.js
+list_models.js
+test_generate.js
+
+# IDEs and OS files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db

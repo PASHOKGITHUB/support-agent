@@ -238,11 +238,11 @@ function ChatContent() {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50 text-slate-800 overflow-hidden">
+    <div className="flex flex-col md:flex-row h-screen bg-slate-50 text-slate-800 overflow-hidden pt-16 md:pt-0">
       <Sidebar />
 
       {/* Chat Sessions History Panel */}
-      <div className="w-80 border-r border-slate-200 bg-white flex flex-col shrink-0">
+      <div className={`${activeSessionId ? 'hidden md:flex' : 'flex'} w-full md:w-80 border-r border-slate-200 bg-white flex-col shrink-0 h-full`}>
         <div className="p-4 border-b border-slate-100 flex justify-between items-center">
           <h2 className="text-sm font-bold text-slate-800">Conversations</h2>
           <button
@@ -300,11 +300,25 @@ function ChatContent() {
       </div>
 
       {/* Main Chat Box */}
-      <div className="flex-1 flex flex-col bg-slate-50/50 relative">
+      <div className={`${activeSessionId ? 'flex' : 'hidden md:flex'} flex-1 flex-col bg-slate-50/50 relative h-full overflow-hidden`}>
         {/* Active Chat Info Header */}
-        <div className="p-4 border-b border-slate-200/80 bg-white flex items-center justify-between">
-          <div>
-            <h2 className="text-sm font-bold text-slate-800">
+        <div className="p-4 border-b border-slate-200/80 bg-white flex items-center gap-3">
+          {activeSessionId && (
+            <button
+              onClick={() => {
+                setActiveSessionId(null);
+                router.push('/chat');
+              }}
+              className="md:hidden p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-800 transition cursor-pointer"
+              title="Back to Conversations"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+            </button>
+          )}
+          <div className="flex-1 min-w-0">
+            <h2 className="text-sm font-bold text-slate-800 truncate">
               {sessions.find(s => s._id === activeSessionId)?.title || 'AI Support Assistant'}
             </h2>
             <p className="text-[10px] text-slate-500 mt-0.5">

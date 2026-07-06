@@ -295,7 +295,53 @@ ${contextText}
 
   } catch (error) {
     console.error('Error generating and streaming public chat reply:', error);
-    res.write(`data: ${JSON.stringify({ error: (error as Error).message })}\n\n`);
+    
+    try {
+      // Fetch the company's support config to show direct contact details
+      const chat = await Chat.findById(id);
+      let support = null;
+      if (chat) {
+        support = await SupportConfig.findOne({ companyId: chat.companyId });
+      }
+      
+      const fallbackEmail = support?.supportEmail || 'support@example.com';
+      const fallbackPhone = support?.supportPhone ? `\n- Phone: ${support.supportPhone}` : '';
+      const fallbackWebsite = support?.supportWebsite ? `\n- Website: ${support.supportWebsite}` : '';
+      const fallbackForm = support?.contactFormLink ? `\n- Contact Form: ${support.contactFormLink}` : '';
+      const fallbackHours = support?.workingHours ? `\n- Support Hours: ${support.workingHours}` : '';
+      
+      const fallbackText = `I apologize, but I am experiencing temporary high traffic and cannot process your message right now. Here is how you can contact our support team directly:\n\n- Email: ${fallbackEmail}${fallbackPhone}${fallbackWebsite}${fallbackForm}${fallbackHours}`;
+
+      // Stream the fallback text to the client so it appears in the chat bubble
+      res.write(`data: ${JSON.stringify({ chunk: fallbackText })}\n\n`);
+      
+      // Save user and fallback assistant message to database to maintain session history
+      if (chat) {
+        const userMsg = {
+          sender: 'user' as const,
+          text: text,
+          createdAt: new Date()
+        };
+        const assistantMsg = {
+          sender: 'assistant' as const,
+          text: fallbackText,
+          citations: [],
+          createdAt: new Date()
+        };
+        chat.messages.push(userMsg);
+        chat.messages.push(assistantMsg);
+        
+        if (chat.messages.length <= 2 && chat.title === 'Guest Conversation') {
+          chat.title = text.length > 40 ? text.substring(0, 40) + '...' : text;
+        }
+        await chat.save();
+      }
+      
+    } catch (dbErr) {
+      console.error('Error during chat fallback processing:', dbErr);
+    }
+    
+    res.write('data: [DONE]\n\n');
     res.end();
   }
 };

@@ -13,6 +13,35 @@ function getGeminiClient() {
 }
 
 /**
+ * Retries an async Gemini request if it fails due to rate limits or quota issues.
+ */
+const retryWithBackoff = async <T>(
+  fn: () => Promise<T>,
+  retries = 3,
+  delay = 1000
+): Promise<T> => {
+  try {
+    return await fn();
+  } catch (error: any) {
+    const errorString = String(error).toLowerCase();
+    const isRateLimit = 
+      error?.status === 429 || 
+      error?.statusCode === 429 ||
+      errorString.includes('429') ||
+      errorString.includes('resource_exhausted') ||
+      errorString.includes('rate limit') ||
+      errorString.includes('quota');
+
+    if (isRateLimit && retries > 0) {
+      console.warn(`[AI Service] Gemini API Rate Limit encountered. Retrying in ${delay}ms... (${retries} attempts remaining)`);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      return retryWithBackoff(fn, retries - 1, delay * 1.5 + Math.random() * 200); // 1.5x backoff with jitter
+    }
+    throw error;
+  }
+};
+
+/**
  * Generate vector embeddings for a given text.
  */
 export const getEmbedding = async (text: string): Promise<number[]> => {
@@ -21,10 +50,12 @@ export const getEmbedding = async (text: string): Promise<number[]> => {
     throw new Error('Gemini API key is not configured. Please set GEMINI_API_KEY in your .env file.');
   }
   try {
-    const response = await gemini.models.embedContent({
-      model: 'gemini-embedding-2',
-      contents: text,
-    });
+    const response = await retryWithBackoff<any>(() => 
+      gemini.models.embedContent({
+        model: 'gemini-embedding-2',
+        contents: text,
+      })
+    );
     if (response.embedding?.values) {
       return response.embedding.values;
     } else if ((response as any).embeddings?.[0]?.values) {
@@ -49,13 +80,15 @@ export const generateChatResponse = async (
     throw new Error('Gemini API key is not configured. Please set GEMINI_API_KEY in your .env file.');
   }
   try {
-    const response = await gemini.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        systemInstruction,
-      },
-    });
+    const response = await retryWithBackoff<any>(() =>
+      gemini.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+          systemInstruction,
+        },
+      })
+    );
     const text = response.text;
     if (text) return text;
     throw new Error('Empty response from Gemini');
@@ -78,13 +111,15 @@ export const generateChatResponseStream = async (
     throw new Error('Gemini API key is not configured. Please set GEMINI_API_KEY in your .env file.');
   }
   try {
-    const responseStream = await gemini.models.generateContentStream({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        systemInstruction,
-      },
-    });
+    const responseStream = await retryWithBackoff<any>(() =>
+      gemini.models.generateContentStream({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+          systemInstruction,
+        },
+      })
+    );
     for await (const chunk of responseStream) {
       const text = chunk.text;
       if (text) onChunk(text);

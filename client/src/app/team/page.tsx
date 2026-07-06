@@ -130,13 +130,13 @@ export default function TeamSettingsPage() {
 
   if (user?.role === 'superadmin') {
     return (
-      <div className="flex min-h-screen bg-slate-50 text-slate-800">
+      <div className="flex flex-col md:flex-row min-h-screen bg-slate-50 text-slate-800">
         <Sidebar />
-        <main className="flex-1 p-8 flex items-center justify-center">
+        <main className="flex-1 p-6 md:p-8 pt-24 md:pt-8 flex items-center justify-center">
           <div className="max-w-md p-6 bg-white border border-slate-200 rounded-3xl text-center space-y-4 shadow-sm">
             <span className="text-3xl">🛡️</span>
             <h2 className="text-lg font-bold text-slate-800">Super Admin Workspace</h2>
-            <p className="text-slate-500 text-xs leading-relaxed">
+            <p className="text-slate-550 text-xs leading-relaxed">
               As a Super Admin, you oversee all companies and do not belong to a single company workspace. Use the Master Panel to manage teams across tenants.
             </p>
           </div>
@@ -146,10 +146,10 @@ export default function TeamSettingsPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50 text-slate-800">
+    <div className="flex flex-col md:flex-row min-h-screen bg-slate-50 text-slate-800">
       <Sidebar />
 
-      <main className="flex-1 p-8 overflow-y-auto max-h-screen">
+      <main className="flex-1 p-6 md:p-8 pt-24 md:pt-8 overflow-y-auto max-h-screen">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">

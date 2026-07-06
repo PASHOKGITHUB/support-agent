@@ -217,7 +217,42 @@ ${contextText}
 
   } catch (error) {
     console.error('Error generating and streaming chat reply:', error);
-    res.write(`data: ${JSON.stringify({ error: (error as Error).message })}\n\n`);
+    
+    try {
+      const chat = await Chat.findById(id);
+      
+      const fallbackText = `I apologize, but the AI is experiencing temporary high traffic and cannot process your message right now. Please try again in a few moments, or check your API usage quota in your admin billing settings.`;
+
+      // Stream the fallback text to the client so it appears in the chat bubble
+      res.write(`data: ${JSON.stringify({ chunk: fallbackText })}\n\n`);
+      
+      // Save user and fallback assistant message to database to maintain session history
+      if (chat) {
+        const userMsg = {
+          sender: 'user' as const,
+          text: text,
+          createdAt: new Date()
+        };
+        const assistantMsg = {
+          sender: 'assistant' as const,
+          text: fallbackText,
+          citations: [],
+          createdAt: new Date()
+        };
+        chat.messages.push(userMsg);
+        chat.messages.push(assistantMsg);
+        
+        if (chat.messages.length <= 2 && chat.title === 'New Conversation') {
+          chat.title = text.length > 40 ? text.substring(0, 40) + '...' : text;
+        }
+        await chat.save();
+      }
+      
+    } catch (dbErr) {
+      console.error('Error during admin chat fallback processing:', dbErr);
+    }
+    
+    res.write('data: [DONE]\n\n');
     res.end();
   }
 };

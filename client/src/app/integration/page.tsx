@@ -37,10 +37,10 @@ export default function IntegrationPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-50 text-slate-800 font-sans">
+    <div className="flex flex-col md:flex-row min-h-screen bg-slate-50 text-slate-800 font-sans">
       <Sidebar />
 
-      <main className="flex-1 p-8 overflow-y-auto max-h-screen">
+      <main className="flex-1 p-6 md:p-8 pt-24 md:pt-8 overflow-y-auto max-h-screen">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">

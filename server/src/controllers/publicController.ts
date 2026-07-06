@@ -1,94 +1,87 @@
-import { Response } from 'express';
-import { AuthRequest } from '../middlewares/auth.js';
+import { Request, Response } from 'express';
 import { Chat } from '../models/Chat.js';
 import { SupportConfig } from '../models/SupportConfig.js';
+import { Company } from '../models/Company.js';
 import { retrieveContext } from '../services/ragService.js';
 import { generateChatResponseStream, condenseSearchQuery } from '../services/aiService.js';
 import mongoose from 'mongoose';
 
-export const createChatSession = async (req: AuthRequest, res: Response) => {
+export const getPublicSupportConfig = async (req: Request, res: Response) => {
+  const { companyId } = req.query;
+
   try {
-    if (!req.userId) {
-      return res.status(401).json({ message: 'Unauthorized. User ID missing.' });
+    if (!companyId) {
+      return res.status(400).json({ message: 'companyId is required.' });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(companyId as string)) {
+      return res.status(400).json({ message: 'Invalid companyId format.' });
+    }
+
+    const config = await SupportConfig.findOne({ companyId: new mongoose.Types.ObjectId(companyId as string) });
+    if (!config) {
+      // Find the company to serve a graceful fallback config
+      const company = await Company.findById(companyId);
+      if (!company) {
+        return res.status(404).json({ message: 'Workspace / Company not found.' });
+      }
+
+      // Return a graceful default configuration to prevent front-end crashes
+      return res.status(200).json({
+        companyId: company._id,
+        companyName: company.name,
+        supportEmail: 'support@example.com',
+        workingHours: '9:00 AM - 5:00 PM (Mon-Fri)',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+    }
+
+    return res.status(200).json(config);
+  } catch (error) {
+    console.error('Get public support config error:', error);
+    return res.status(500).json({ message: 'Server error fetching support config.' });
+  }
+};
+
+export const createPublicChatSession = async (req: Request, res: Response) => {
+  const { companyId } = req.body;
+
+  try {
+    if (!companyId) {
+      return res.status(400).json({ message: 'companyId is required.' });
     }
 
     const chat = await Chat.create({
-      userId: new mongoose.Types.ObjectId(req.userId),
-      title: 'New Conversation',
-      companyId: req.companyId ? new mongoose.Types.ObjectId(req.companyId) : undefined,
+      title: 'Guest Conversation',
+      companyId: new mongoose.Types.ObjectId(companyId),
       messages: []
     });
 
     return res.status(201).json(chat);
   } catch (error) {
-    console.error('Create chat session error:', error);
-    return res.status(500).json({ message: 'Server error creating chat session.' });
+    console.error('Create public chat session error:', error);
+    return res.status(500).json({ message: 'Server error creating public chat session.' });
   }
 };
 
-export const getChatSessions = async (req: AuthRequest, res: Response) => {
-  try {
-    const filter: any = {};
-    if (req.userId) {
-      filter.userId = new mongoose.Types.ObjectId(req.userId);
-    }
-    if (req.companyId) {
-      filter.companyId = new mongoose.Types.ObjectId(req.companyId);
-    }
-
-    const chats = await Chat.find(filter)
-      .select('title createdAt messages')
-      .sort({ createdAt: -1 });
-
-    return res.status(200).json(chats);
-  } catch (error) {
-    console.error('Get chat sessions error:', error);
-    return res.status(500).json({ message: 'Server error fetching chats.' });
-  }
-};
-
-export const getChatSession = async (req: AuthRequest, res: Response) => {
+export const getPublicChatSession = async (req: Request, res: Response) => {
   const { id } = req.params;
 
   try {
     const chat = await Chat.findById(id);
     if (!chat) {
       return res.status(404).json({ message: 'Chat session not found.' });
-    }
-
-    if (req.companyId && chat.companyId?.toString() !== req.companyId) {
-      return res.status(403).json({ message: 'Unauthorized access to this chat.' });
     }
 
     return res.status(200).json(chat);
   } catch (error) {
-    console.error('Get chat session error:', error);
-    return res.status(500).json({ message: 'Server error fetching chat details.' });
+    console.error('Get public chat session error:', error);
+    return res.status(500).json({ message: 'Server error fetching chat.' });
   }
 };
 
-export const deleteChatSession = async (req: AuthRequest, res: Response) => {
-  const { id } = req.params;
-
-  try {
-    const chat = await Chat.findById(id);
-    if (!chat) {
-      return res.status(404).json({ message: 'Chat session not found.' });
-    }
-
-    if (req.companyId && chat.companyId?.toString() !== req.companyId) {
-      return res.status(403).json({ message: 'Unauthorized access to this chat.' });
-    }
-
-    await Chat.findByIdAndDelete(id);
-    return res.status(200).json({ message: 'Chat session deleted.' });
-  } catch (error) {
-    console.error('Delete chat session error:', error);
-    return res.status(500).json({ message: 'Server error deleting chat.' });
-  }
-};
-
-export const sendMessage = async (req: AuthRequest, res: Response) => {
+export const sendPublicMessage = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { text } = req.body;
 
@@ -102,22 +95,20 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ message: 'Chat session not found.' });
     }
 
+    const companyIdStr = chat.companyId?.toString();
+
     // Condense user query using recent chat history
     const recentHistory = chat.messages.slice(-5);
     const condensedQuery = await condenseSearchQuery(text, recentHistory);
 
-    // 1. Retrieve contexts matching the search query
-    const contexts = await retrieveContext(condensedQuery, 4, req.companyId?.toString());
+    // 1. Retrieve context using the search-optimized query
+    const contexts = await retrieveContext(condensedQuery, 4, companyIdStr);
 
-    // 2. Fetch Support config for the company/default
-    const companyFilter = req.companyId 
-      ? { companyId: new mongoose.Types.ObjectId(req.companyId) } 
-      : { companyId: { $exists: false } };
-      
-    let support = await SupportConfig.findOne(companyFilter);
+    // 2. Fetch Support config for the company
+    let support = await SupportConfig.findOne({ companyId: chat.companyId });
     if (!support) {
       support = new SupportConfig({
-        companyName: 'System Support',
+        companyName: 'Support Assistant',
         supportEmail: 'support@example.com',
         workingHours: '9:00 AM - 5:00 PM (Mon-Fri)'
       });
@@ -139,7 +130,7 @@ STRICT RESPONSE RULES:
    "I apologize, but I couldn't find details on that. Please feel free to contact our support team directly for assistance:"
    Then, present the customer with the official company support details listed below.
 4. Do not mention or reference information from outside the provided context.
-5. If answering from the context, include citation references like (Source: filename.pdf) or "[Source X]" in your text.
+5. Do NOT include, mention, or output any source names, document filenames, or citations (such as "[Source X]" or "(Source: ...)") in your response. Answer in natural, clean sentences only.
 
 Official Escalation Contact Details:
 - Support Email: ${support.supportEmail}
@@ -196,7 +187,6 @@ ${contextText}
     const assistantMsg = {
       sender: 'assistant' as const,
       text: fullResponseText,
-      // Only attach citations if we actually found context
       citations: contexts.length > 0 ? citations : [],
       createdAt: new Date()
     };
@@ -204,8 +194,7 @@ ${contextText}
     chat.messages.push(userMsg);
     chat.messages.push(assistantMsg);
 
-    // Auto rename session based on first query
-    if (chat.messages.length <= 2 && chat.title === 'New Conversation') {
+    if (chat.messages.length <= 2 && chat.title === 'Guest Conversation') {
       chat.title = text.length > 40 ? text.substring(0, 40) + '...' : text;
     }
 
@@ -216,8 +205,32 @@ ${contextText}
     res.end();
 
   } catch (error) {
-    console.error('Error generating and streaming chat reply:', error);
+    console.error('Error generating and streaming public chat reply:', error);
     res.write(`data: ${JSON.stringify({ error: (error as Error).message })}\n\n`);
     res.end();
+  }
+};
+
+export const submitPublicFeedback = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { feedback } = req.body;
+
+  try {
+    if (!['helpful', 'not_helpful'].includes(feedback)) {
+      return res.status(400).json({ message: 'Invalid feedback value. Must be "helpful" or "not_helpful".' });
+    }
+
+    const chat = await Chat.findById(id);
+    if (!chat) {
+      return res.status(404).json({ message: 'Chat session not found.' });
+    }
+
+    chat.feedback = feedback;
+    await chat.save();
+
+    return res.status(200).json({ message: 'Feedback recorded successfully.', feedback: chat.feedback });
+  } catch (error) {
+    console.error('Submit feedback error:', error);
+    return res.status(550).json({ message: 'Server error saving feedback.' });
   }
 };

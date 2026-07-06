@@ -65,6 +65,9 @@ function ChatContent() {
       if (targetId) {
         setActiveSessionId(targetId);
         loadSessionMessages(targetId);
+        if (!queryId) {
+          router.push(`/chat?id=${targetId}`);
+        }
       }
     } catch (err) {
       console.error(err);
@@ -74,8 +77,18 @@ function ChatContent() {
     }
   };
 
+  // Fetch the chat sessions list once on mount
   useEffect(() => {
     fetchSessions();
+  }, []);
+
+  // Update active session and load messages when URL changes, without refetching sessions list
+  useEffect(() => {
+    const queryId = searchParams.get('id');
+    if (queryId && queryId !== activeSessionId) {
+      setActiveSessionId(queryId);
+      loadSessionMessages(queryId);
+    }
   }, [searchParams]);
 
   // Load specific session messages
@@ -95,6 +108,20 @@ function ChatContent() {
 
   // Create new chat session
   const handleNewChat = async () => {
+    // 1. If currently active chat is already empty, do nothing
+    if (activeSessionId && messages.length === 0) {
+      return;
+    }
+
+    // 2. Check if there is an existing empty chat in the list, and switch to it
+    const existingEmpty = (sessions as any[]).find(s => !s.messages || s.messages.length === 0);
+    if (existingEmpty) {
+      setActiveSessionId(existingEmpty._id);
+      setMessages([]);
+      router.push(`/chat?id=${existingEmpty._id}`);
+      return;
+    }
+
     try {
       setError('');
       const newChat = await api.post('/chats', {});

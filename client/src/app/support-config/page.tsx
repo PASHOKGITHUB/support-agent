@@ -3,8 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/Sidebar';
 import { api } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
+import Link from 'next/link';
 
 export default function SupportConfigPage() {
+  const { user } = useAuth();
   const [companyName, setCompanyName] = useState('');
   const [supportEmail, setSupportEmail] = useState('');
   const [supportPhone, setSupportPhone] = useState('');
@@ -16,6 +19,11 @@ export default function SupportConfigPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [copiedType, setCopiedType] = useState<'link' | 'iframe' | 'widget' | null>(null);
+  
+  // Subscription Plan Info
+  const [companyPlan, setCompanyPlan] = useState('Free');
+  const [expiresAt, setExpiresAt] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -29,6 +37,8 @@ export default function SupportConfigPage() {
           setSupportWebsite(data.supportWebsite || '');
           setContactFormLink(data.contactFormLink || '');
           setWorkingHours(data.workingHours || '');
+          setCompanyPlan(data.companyPlan || 'Free');
+          setExpiresAt(data.expiresAt || null);
         }
       } catch (err) {
         console.error(err);
@@ -206,6 +216,72 @@ export default function SupportConfigPage() {
                 )}
               </button>
             </form>
+          </div>
+        )}
+
+        {!loading && (
+          <div className="max-w-2xl mt-8 p-8 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-4">
+            <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+              <div>
+                <h2 className="text-base font-bold text-slate-800">Subscription & Storage Plan</h2>
+                <p className="text-[10px] text-slate-500 mt-0.5">Your current business workspace limit constraints.</p>
+              </div>
+              <Link href="/billing" className="px-3.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-650 font-bold rounded-xl text-[10px] transition-all cursor-pointer">
+                Change Plan
+              </Link>
+            </div>
+
+            <div className="flex justify-between items-center text-xs">
+              <div className="space-y-1">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active plan tier</p>
+                <p className="font-extrabold text-slate-700">{companyPlan} Plan</p>
+              </div>
+              <div className="space-y-1 text-right">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Expiration Date</p>
+                <p className="font-semibold text-slate-650">
+                  {expiresAt ? new Date(expiresAt).toLocaleDateString() : 'Lifetime Active'}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {!loading && (
+          <div className="max-w-2xl mt-8 p-8 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-3 border-b border-slate-100 gap-3">
+              <div>
+                <h2 className="text-base font-bold text-slate-800">Shareable Customer Chat Link</h2>
+                <p className="text-[10px] text-slate-500 mt-0.5">
+                  Direct shareable link to open the customer-facing full-screen chat assistant.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <a
+                  href={`${typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'}/embed/chat?companyId=${user?.companyId || 'YOUR_COMPANY_ID'}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-all flex items-center gap-1 cursor-pointer shrink-0 shadow-sm"
+                >
+                  Launch Chat ↗
+                </a>
+                <button
+                  onClick={() => {
+                    const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+                    const link = `${origin}/embed/chat?companyId=${user?.companyId || 'YOUR_COMPANY_ID'}`;
+                    navigator.clipboard.writeText(link);
+                    setCopiedType('link');
+                    setTimeout(() => setCopiedType(null), 2000);
+                  }}
+                  className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold rounded-xl text-xs transition-all flex items-center gap-1 cursor-pointer shrink-0 shadow-sm"
+                >
+                  {copiedType === 'link' ? 'Copied!' : 'Copy Link'}
+                </button>
+              </div>
+            </div>
+
+            <pre className="p-4 bg-slate-900 text-slate-200 rounded-2xl text-xs font-mono overflow-x-auto border border-slate-800 whitespace-pre-wrap select-all font-semibold leading-relaxed">
+              {`${typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'}/embed/chat?companyId=${user?.companyId || 'YOUR_COMPANY_ID'}`}
+            </pre>
           </div>
         )}
       </main>

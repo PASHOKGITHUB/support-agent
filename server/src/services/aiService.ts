@@ -14,48 +14,25 @@ function getGeminiClient() {
 
 /**
  * Generate vector embeddings for a given text.
- * Falls back to local Ollama if Gemini API is not configured or fails.
  */
 export const getEmbedding = async (text: string): Promise<number[]> => {
   const gemini = getGeminiClient();
-  if (gemini) {
-    try {
-      const response = await gemini.models.embedContent({
-        model: 'gemini-embedding-2',
-        contents: text,
-      });
-      if (response.embedding?.values) {
-        return response.embedding.values;
-      } else if ((response as any).embeddings?.[0]?.values) {
-        return (response as any).embeddings[0].values;
-      }
-      throw new Error('Unexpected embedding response format from Gemini');
-    } catch (error) {
-      console.warn('Gemini embedding failed, falling back to Ollama:', (error as Error).message);
-    }
+  if (!gemini) {
+    throw new Error('Gemini API key is not configured. Please set GEMINI_API_KEY in your .env file.');
   }
-
-  // Fallback: Ollama nomic-embed-text
   try {
-    const ollamaHost = process.env.OLLAMA_HOST || 'http://127.0.0.1:11434';
-    const response = await fetch(`${ollamaHost}/api/embeddings`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'nomic-embed-text',
-        prompt: text,
-      }),
+    const response = await gemini.models.embedContent({
+      model: 'gemini-embedding-2',
+      contents: text,
     });
-    if (!response.ok) {
-      throw new Error(`Ollama embedding error: ${response.statusText}`);
+    if (response.embedding?.values) {
+      return response.embedding.values;
+    } else if ((response as any).embeddings?.[0]?.values) {
+      return (response as any).embeddings[0].values;
     }
-    const data = (await response.json()) as any;
-    if (data.embedding) {
-      return data.embedding;
-    }
-    throw new Error('Ollama embedding response missing embedding array');
+    throw new Error('Unexpected embedding response format from Gemini');
   } catch (error) {
-    console.error('Ollama Embedding Error:', error);
+    console.error('Gemini Embedding Error:', error);
     throw new Error(`Embedding generation failed: ${(error as Error).message}`);
   }
 };
@@ -68,43 +45,22 @@ export const generateChatResponse = async (
   systemInstruction: string
 ): Promise<string> => {
   const gemini = getGeminiClient();
-  if (gemini) {
-    try {
-      const response = await gemini.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
-        config: {
-          systemInstruction,
-        },
-      });
-      const text = response.text;
-      if (text) return text;
-      throw new Error('Empty response from Gemini');
-    } catch (error) {
-      console.warn('Gemini generation failed, falling back to Ollama:', (error as Error).message);
-    }
+  if (!gemini) {
+    throw new Error('Gemini API key is not configured. Please set GEMINI_API_KEY in your .env file.');
   }
-
-  // Fallback: Ollama llama3
   try {
-    const ollamaHost = process.env.OLLAMA_HOST || 'http://127.0.0.1:11434';
-    const response = await fetch(`${ollamaHost}/api/generate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'llama3',
-        system: systemInstruction,
-        prompt: prompt,
-        stream: false,
-      }),
+    const response = await gemini.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+      config: {
+        systemInstruction,
+      },
     });
-    if (!response.ok) {
-      throw new Error(`Ollama generation error: ${response.statusText}`);
-    }
-    const data = (await response.json()) as any;
-    return data.response;
+    const text = response.text;
+    if (text) return text;
+    throw new Error('Empty response from Gemini');
   } catch (error) {
-    console.error('Ollama Generation Error:', error);
+    console.error('Gemini Generation Error:', error);
     throw new Error(`AI generation failed: ${(error as Error).message}`);
   }
 };
@@ -118,64 +74,61 @@ export const generateChatResponseStream = async (
   onChunk: (text: string) => void
 ): Promise<void> => {
   const gemini = getGeminiClient();
-  if (gemini) {
-    try {
-      const responseStream = await gemini.models.generateContentStream({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
-        config: {
-          systemInstruction,
-        },
-      });
-      for await (const chunk of responseStream) {
-        const text = chunk.text;
-        if (text) onChunk(text);
-      }
-      return;
-    } catch (error) {
-      console.warn('Gemini stream failed, falling back to Ollama:', (error as Error).message);
-    }
+  if (!gemini) {
+    throw new Error('Gemini API key is not configured. Please set GEMINI_API_KEY in your .env file.');
   }
-
-  // Fallback: Ollama llama3
   try {
-    const ollamaHost = process.env.OLLAMA_HOST || 'http://127.0.0.1:11434';
-    const response = await fetch(`${ollamaHost}/api/generate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'llama3',
-        system: systemInstruction,
-        prompt: prompt,
-        stream: true,
-      }),
+    const responseStream = await gemini.models.generateContentStream({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+      config: {
+        systemInstruction,
+      },
     });
-    if (!response.ok) {
-      throw new Error(`Ollama stream error: ${response.statusText}`);
-    }
-    const reader = response.body;
-    if (!reader) {
-      throw new Error('Ollama response body is empty');
-    }
-
-    const decoder = new TextDecoder();
-    for await (const chunk of reader as any) {
-      const text = decoder.decode(chunk);
-      const lines = text.split('\n');
-      for (const line of lines) {
-        if (!line.trim()) continue;
-        try {
-          const parsed = JSON.parse(line);
-          if (parsed.response) {
-            onChunk(parsed.response);
-          }
-        } catch (err) {
-          // ignore parsing error for incomplete JSON lines
-        }
-      }
+    for await (const chunk of responseStream) {
+      const text = chunk.text;
+      if (text) onChunk(text);
     }
   } catch (error) {
-    console.error('Ollama Streaming Error:', error);
+    console.error('Gemini Streaming Error:', error);
     throw new Error(`AI Streaming failed: ${(error as Error).message}`);
   }
+};
+
+/**
+ * Condense a conversational query into a standalone query using conversation history.
+ */
+export const condenseSearchQuery = async (
+  text: string,
+  history: any[]
+): Promise<string> => {
+  if (!history || history.length === 0) return text;
+
+  // Format recent chat messages
+  const historyText = history
+    .map((msg) => `${msg.sender === 'user' ? 'User' : 'Assistant'}: ${msg.text}`)
+    .join('\n');
+
+  const systemInstruction = 
+    'You are a search query optimizer. Given a conversation history and a new query, ' +
+    'your job is to write a single search-friendly phrase that captures the core entity/question. ' +
+    'Do not output greeting, explanation, or conversational text. Output ONLY the standalone search query.';
+
+  const prompt = `
+Conversation History:
+${historyText}
+
+New Query: ${text}
+
+Output the optimized standalone query:`;
+
+  try {
+    const condensed = await generateChatResponse(prompt, systemInstruction);
+    if (condensed && condensed.trim().length > 0) {
+      return condensed.trim();
+    }
+  } catch (error) {
+    console.warn('Failed to condense search query, falling back to raw input:', (error as Error).message);
+  }
+  return text;
 };

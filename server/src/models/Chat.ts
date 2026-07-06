@@ -14,10 +14,11 @@ export interface IMessage {
 }
 
 export interface IChat extends MongooseDocument {
-  userId: mongoose.Types.ObjectId;
+  userId?: mongoose.Types.ObjectId;
   title: string;
   companyId?: mongoose.Types.ObjectId;
   messages: IMessage[];
+  feedback?: 'helpful' | 'not_helpful' | null;
   createdAt: Date;
 }
 
@@ -35,10 +36,11 @@ const MessageSchema = new Schema<IMessage>({
 }, { _id: false });
 
 const ChatSchema = new Schema<IChat>({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+  userId: { type: Schema.Types.ObjectId, ref: 'User', index: true },
   title: { type: String, default: 'New Conversation' },
   companyId: { type: Schema.Types.ObjectId, ref: 'Company', index: true },
   messages: [MessageSchema],
+  feedback: { type: String, enum: ['helpful', 'not_helpful', null], default: null },
   createdAt: { type: Date, default: Date.now }
 });
 

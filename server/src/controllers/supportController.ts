@@ -22,7 +22,25 @@ export const getSupportConfig = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    return res.status(200).json(config);
+    let companyPlan = 'Free';
+    let upgradedAt = null;
+    let expiresAt = null;
+    if (companyId) {
+      const CompanyModel = mongoose.model('Company');
+      const company = await CompanyModel.findById(companyId);
+      if (company) {
+        companyPlan = (company as any).plan || 'Free';
+        upgradedAt = (company as any).upgradedAt || null;
+        expiresAt = (company as any).expiresAt || null;
+      }
+    }
+
+    return res.status(200).json({
+      ...config.toObject(),
+      companyPlan,
+      upgradedAt,
+      expiresAt
+    });
   } catch (error) {
     console.error('Get support config error:', error);
     return res.status(500).json({ message: 'Server error fetching support configurations.' });

@@ -18,6 +18,7 @@ interface ChatSession {
   title: string;
   createdAt: string;
   messages: any[];
+  feedback?: 'helpful' | 'not_helpful' | null;
 }
 
 export default function DashboardPage() {
@@ -26,6 +27,12 @@ export default function DashboardPage() {
   const [supportEmail, setSupportEmail] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  // Subscription Date States
+  const [companyPlan, setCompanyPlan] = useState('Free');
+  const [upgradedAt, setUpgradedAt] = useState<string | null>(null);
+  const [expiresAt, setExpiresAt] = useState<string | null>(null);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -39,6 +46,9 @@ export default function DashboardPage() {
         setDocs(docsData);
         setChats(chatsData);
         setSupportEmail(supportData.supportEmail);
+        setCompanyPlan(supportData.companyPlan || 'Free');
+        setUpgradedAt(supportData.upgradedAt || null);
+        setExpiresAt(supportData.expiresAt || null);
       } catch (err) {
         setError('Failed to fetch dashboard metrics.');
         console.error(err);
@@ -58,20 +68,126 @@ export default function DashboardPage() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  const totalMessages = chats.reduce((sum, c) => sum + (c.messages || []).length, 0);
+  const feedbackChats = chats.filter(c => c.feedback);
+  const helpfulChatsCount = chats.filter(c => c.feedback === 'helpful').length;
+  const satisfactionRate = feedbackChats.length > 0
+    ? Math.round((helpfulChatsCount / feedbackChats.length) * 100)
+    : 100;
+
+  let daysLeft: number | null = null;
+  if (expiresAt) {
+    const diff = new Date(expiresAt).getTime() - Date.now();
+    daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
+  }
+
+  const inAppNotifications = [];
+  if (companyPlan === 'Free') {
+    inAppNotifications.push({
+      id: 'plan_free',
+      type: 'warning',
+      text: 'You are currently on the Free plan. Upgrade to unlock document capacity and custom widget styling.',
+      date: new Date().toLocaleDateString()
+    });
+  } else if (upgradedAt) {
+    inAppNotifications.push({
+      id: 'plan_upgrade',
+      type: 'success',
+      text: `Your workspace subscription was upgraded to the ${companyPlan} plan.`,
+      date: new Date(upgradedAt).toLocaleDateString()
+    });
+  }
+
+  if (daysLeft !== null) {
+    if (daysLeft <= 0) {
+      inAppNotifications.push({
+        id: 'plan_expired',
+        type: 'error',
+        text: `Your ${companyPlan} subscription has expired. Please contact billing.`,
+        date: new Date(expiresAt!).toLocaleDateString()
+      });
+    } else if (daysLeft <= 7) {
+      inAppNotifications.push({
+        id: 'plan_expiring_soon',
+        type: 'warning',
+        text: `Your ${companyPlan} subscription expires in ${daysLeft} days. Renewal required.`,
+        date: new Date(expiresAt!).toLocaleDateString()
+      });
+    }
+  }
+
   return (
     <div className="flex min-h-screen bg-slate-50 text-slate-800">
       <Sidebar />
 
       <main className="flex-1 p-8 overflow-y-auto max-h-screen">
+        {/* Top Announcement Bar if Free Plan */}
+        {companyPlan === 'Free' && (
+          <div className="mb-6 p-4 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-2xl text-xs font-bold flex justify-between items-center shadow-md shadow-orange-500/5">
+            <span>📢 Announcement: You are on the Free Plan. Upgrade your subscription to Starter or Growth to get more storage capacity!</span>
+            <Link href="/billing" className="px-3 py-1.5 bg-white text-orange-700 hover:bg-slate-100 rounded-xl font-extrabold transition-colors">
+              Upgrade Now
+            </Link>
+          </div>
+        )}
+
+        {/* Subscription Expiration Reminder Banner */}
+        {daysLeft !== null && daysLeft <= 7 && (
+          <div className="mb-6 p-4 bg-red-600 text-white rounded-2xl text-xs font-bold flex justify-between items-center shadow-md animate-pulse">
+            <span>⚠️ Subscription Notice: Your {companyPlan} plan will expire in {daysLeft} {daysLeft === 1 ? 'day' : 'days'} (on {new Date(expiresAt!).toLocaleDateString()}). Please renew to keep your features active!</span>
+            <Link href="/billing" className="px-3 py-1.5 bg-white text-red-700 hover:bg-slate-100 rounded-xl font-extrabold transition-colors">
+              Renew Now
+            </Link>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
               Welcome Dashboard
             </h1>
-            <p className="text-slate-500 text-sm mt-1">
+            <p className="text-slate-550 text-sm mt-1">
               Monitor your document-grounded AI support engine activity.
             </p>
+          </div>
+
+          {/* In-app Notification Bell */}
+          <div className="relative">
+            <button
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="p-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl transition-all cursor-pointer shadow-sm flex items-center gap-2 text-xs font-semibold"
+            >
+              <span>🔔 Notifications</span>
+              {inAppNotifications.length > 0 && (
+                <span className="px-1.5 py-0.5 bg-red-500 text-white rounded-full text-[9px] font-bold">
+                  {inAppNotifications.length}
+                </span>
+              )}
+            </button>
+
+            {showNotifications && (
+              <div className="absolute right-0 mt-2 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 p-4 space-y-3">
+                <h3 className="text-xs font-extrabold text-slate-800 pb-2 border-b border-slate-100">In-App Notifications</h3>
+                {inAppNotifications.length === 0 ? (
+                  <p className="text-[10px] text-slate-400 py-3 text-center">No new notifications</p>
+                ) : (
+                  <div className="space-y-2.5 max-h-60 overflow-y-auto">
+                    {inAppNotifications.map((notif, index) => (
+                      <div key={index} className="p-3 bg-slate-50 rounded-xl text-[10px] leading-relaxed border border-slate-100">
+                        <div className="flex justify-between font-bold text-slate-500 mb-1">
+                          <span className={notif.type === 'error' ? 'text-red-500' : notif.type === 'warning' ? 'text-amber-500' : 'text-emerald-500'}>
+                            {notif.type.toUpperCase()}
+                          </span>
+                          <span>{notif.date}</span>
+                        </div>
+                        <p className="text-slate-700 font-semibold">{notif.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -94,7 +210,7 @@ export default function DashboardPage() {
         ) : (
           <>
             {/* Metrics Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
               {/* Card 1 */}
               <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm relative overflow-hidden group hover:border-slate-300 transition-all duration-300">
                 <div className="flex justify-between items-start mb-4">
@@ -120,21 +236,35 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <div className="text-3xl font-extrabold text-slate-800 mb-1">{chats.length}</div>
-                <p className="text-slate-500 text-xs">AI Chat sessions logged</p>
+                <p className="text-slate-550 text-xs">AI Chat sessions logged</p>
               </div>
 
               {/* Card 3 */}
               <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm relative overflow-hidden group hover:border-slate-300 transition-all duration-300">
                 <div className="flex justify-between items-start mb-4">
-                  <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">System Config</span>
-                  <div className="p-2 rounded-lg bg-emerald-50 text-emerald-650">
+                  <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Messages Logged</span>
+                  <div className="p-2 rounded-lg bg-blue-50 text-blue-650">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                     </svg>
                   </div>
                 </div>
-                <div className="text-sm font-bold text-slate-800 mb-1 truncate">{supportEmail || 'Escalation Off'}</div>
-                <p className="text-slate-550 text-xs mt-3">Fallback contact configured</p>
+                <div className="text-3xl font-extrabold text-slate-800 mb-1">{totalMessages}</div>
+                <p className="text-slate-500 text-xs">Total inputs & assistant replies</p>
+              </div>
+
+              {/* Card 4 */}
+              <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm relative overflow-hidden group hover:border-slate-300 transition-all duration-300">
+                <div className="flex justify-between items-start mb-4">
+                  <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">CSAT Satisfaction</span>
+                  <div className="p-2 rounded-lg bg-emerald-50 text-emerald-650">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="text-3xl font-extrabold text-slate-800 mb-1">{satisfactionRate}%</div>
+                <p className="text-slate-500 text-xs">{feedbackChats.length} Ratings submitted</p>
               </div>
             </div>
 

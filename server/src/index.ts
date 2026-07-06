@@ -6,6 +6,9 @@ import authRoutes from './routes/authRoutes.js';
 import documentRoutes from './routes/documentRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
 import supportRoutes from './routes/supportRoutes.js';
+import publicRoutes from './routes/publicRoutes.js';
+import teamRoutes from './routes/teamRoutes.js';
+import superAdminRoutes from './routes/superAdminRoutes.js';
 
 // Load environment variables
 dotenv.config();
@@ -29,6 +32,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/chats', chatRoutes);
 app.use('/api/support', supportRoutes);
+app.use('/api/public', publicRoutes);
+app.use('/api/team', teamRoutes);
+app.use('/api/super-admin', superAdminRoutes);
 
 // Health Check route
 app.get('/health', (req, res) => {

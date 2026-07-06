@@ -19,6 +19,8 @@ export default function KnowledgeBasePage() {
   const [uploadStatus, setUploadStatus] = useState('');
   const [error, setError] = useState('');
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const isDroppingRef = useRef(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -41,18 +43,47 @@ export default function KnowledgeBasePage() {
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = 'copy';
+    }
+  };
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = 'copy';
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
   };
 
   const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    isDroppingRef.current = true;
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       await uploadFile(e.dataTransfer.files[0]);
     }
+    setTimeout(() => {
+      isDroppingRef.current = false;
+    }, 150);
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       await uploadFile(e.target.files[0]);
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -138,9 +169,21 @@ export default function KnowledgeBasePage() {
         {/* Drag & Drop Upload Zone */}
         <div
           onDragOver={handleDragOver}
+          onDragEnter={handleDragEnter}
+          onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          onClick={() => fileInputRef.current?.click()}
-          className={`border-2 border-dashed rounded-3xl p-12 text-center flex flex-col items-center justify-center cursor-pointer transition-all duration-300 mb-8 ${uploading ? 'border-indigo-500 bg-indigo-50 cursor-wait' : 'border-slate-300 hover:border-indigo-500 hover:bg-indigo-50/20 bg-white shadow-sm'}`}
+          onClick={(e) => {
+            if (uploading) return;
+            if (isDroppingRef.current) return;
+            fileInputRef.current?.click();
+          }}
+          className={`border-2 border-dashed rounded-3xl p-12 text-center flex flex-col items-center justify-center cursor-pointer transition-all duration-300 mb-8 ${
+            uploading 
+              ? 'border-indigo-500 bg-indigo-50 cursor-wait' 
+              : isDragging
+                ? 'border-indigo-500 bg-indigo-100/50 scale-[1.01] shadow-md'
+                : 'border-slate-300 hover:border-indigo-500 hover:bg-indigo-50/20 bg-white shadow-sm'
+          }`}
         >
           <input
             type="file"
@@ -151,27 +194,29 @@ export default function KnowledgeBasePage() {
             disabled={uploading}
           />
           
-          {uploading ? (
-            <div className="flex flex-col items-center gap-4">
-              <svg className="animate-spin h-10 w-10 text-indigo-650" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-              <p className="text-sm font-bold text-indigo-600 animate-pulse">{uploadStatus}</p>
-            </div>
-          ) : (
-            <>
-              <div className="p-4 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 mb-4 transition-transform group-hover:scale-110">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          <div className="pointer-events-none flex flex-col items-center justify-center">
+            {uploading ? (
+              <div className="flex flex-col items-center gap-4">
+                <svg className="animate-spin h-10 w-10 text-indigo-650" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
+                <p className="text-sm font-bold text-indigo-600 animate-pulse">{uploadStatus}</p>
               </div>
-              <h3 className="text-lg font-bold text-slate-700 mb-1">Drag & Drop files here</h3>
-              <p className="text-slate-500 text-xs max-w-xs">
-                or click to browse from files. Maximum size: 10MB (PDF, DOCX, TXT).
-              </p>
-            </>
-          )}
+            ) : (
+              <>
+                <div className="p-4 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 mb-4 transition-transform group-hover:scale-110">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-bold text-slate-700 mb-1">Drag & Drop files here</h3>
+                <p className="text-slate-550 text-xs max-w-xs">
+                  or click to browse from files. Maximum size: 10MB (PDF, DOCX, TXT).
+                </p>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Documents Section */}

@@ -37,9 +37,14 @@ const handleResponse = async (response: Response) => {
 
 export const api = {
   get: async (endpoint: string) => {
-    const res = await fetch(`${API_URL}${endpoint}`, {
+    const separator = endpoint.includes('?') ? '&' : '?';
+    const res = await fetch(`${API_URL}${endpoint}${separator}_t=${Date.now()}`, {
       method: 'GET',
-      headers: getHeaders()
+      headers: {
+        ...getHeaders(),
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+        'Pragma': 'no-cache'
+      }
     });
     return handleResponse(res);
   },
@@ -47,6 +52,15 @@ export const api = {
   post: async (endpoint: string, body: any) => {
     const res = await fetch(`${API_URL}${endpoint}`, {
       method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(body)
+    });
+    return handleResponse(res);
+  },
+
+  put: async (endpoint: string, body: any) => {
+    const res = await fetch(`${API_URL}${endpoint}`, {
+      method: 'PUT',
       headers: getHeaders(),
       body: JSON.stringify(body)
     });

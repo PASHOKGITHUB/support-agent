@@ -60,12 +60,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Protect client side routes
   useEffect(() => {
     if (!loading) {
-      const publicRoutes = ['/login', '/register'];
+      const publicRoutes = ['/login', '/register', '/embed/chat', '/testuser'];
       const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
+      const isLandingPage = pathname === '/';
+      
+      const authRoutes = ['/login', '/register'];
+      const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
 
-      if (!user && !isPublicRoute) {
+      if (!user && !isPublicRoute && !isLandingPage) {
         router.push('/login');
-      } else if (user && isPublicRoute) {
+      } else if (user && isAuthRoute) {
         router.push('/dashboard');
       }
     }

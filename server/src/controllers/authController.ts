@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/User.js';
+import { Company } from '../models/Company.js';
 import { AuthRequest } from '../middlewares/auth.js';
 
 const generateToken = (userId: string, role: string, companyId?: string): string => {
@@ -10,7 +11,7 @@ const generateToken = (userId: string, role: string, companyId?: string): string
 };
 
 export const register = async (req: Request, res: Response) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, companyName } = req.body;
 
   try {
     if (!name || !email || !password) {
@@ -26,15 +27,21 @@ export const register = async (req: Request, res: Response) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create user
+    // Create a new Company workspace for this user
+    const company = await Company.create({
+      name: companyName || `${name}'s Workspace`
+    });
+
+    // Create user linked to their new Company
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
-      role: 'admin' // First user registers as admin
+      role: 'admin', // First user registers as admin
+      companyId: company._id
     });
 
-    const token = generateToken(user._id.toString(), user.role);
+    const token = generateToken(user._id.toString(), user.role, company._id.toString());
 
     return res.status(201).json({
       token,
@@ -42,7 +49,8 @@ export const register = async (req: Request, res: Response) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        companyId: company._id
       }
     });
   } catch (error) {

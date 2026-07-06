@@ -34,10 +34,10 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="flex-1 flex items-center justify-center p-6 bg-slate-50">
+    <main className="flex-1 flex items-center justify-center p-6 bg-[#07080e] relative min-h-screen">
       {/* Background glow effects */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-550/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-550/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="w-full max-w-md relative z-10">
         {/* Logo/Branding Header */}
@@ -45,27 +45,27 @@ export default function LoginPage() {
           <div className="mb-4">
             <BrandLogo className="h-10 w-10" />
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700">
+          <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-slate-300">
             SupportAgent.ai
           </h1>
-          <p className="text-slate-550 mt-2 text-sm">
+          <p className="text-slate-400 mt-2 text-sm font-medium">
             AI-powered customer support grounding platform
           </p>
         </div>
 
         {/* Card Container */}
-        <div className="bg-white border border-slate-200/80 rounded-3xl shadow-xl p-8 relative overflow-hidden">
+        <div className="bg-slate-900/40 border border-slate-800/80 rounded-3xl shadow-2xl p-8 relative overflow-hidden backdrop-blur-md">
           {/* Tab Switcher */}
-          <div className="flex p-1 bg-slate-100/80 rounded-xl border border-slate-200/50 mb-6">
+          <div className="flex p-1 bg-slate-950/80 rounded-xl border border-slate-800/40 mb-6">
             <button
               onClick={() => { setIsLogin(true); setError(''); }}
-              className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-300 ${isLogin ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/10' : 'text-slate-500 hover:text-slate-800'}`}
+              className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-300 cursor-pointer ${isLogin ? 'bg-indigo-650 text-white shadow-md shadow-indigo-600/10' : 'text-slate-400 hover:text-slate-200'}`}
             >
               Sign In
             </button>
             <button
               onClick={() => { setIsLogin(false); setError(''); }}
-              className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-300 ${!isLogin ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/10' : 'text-slate-500 hover:text-slate-800'}`}
+              className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-300 cursor-pointer ${!isLogin ? 'bg-indigo-650 text-white shadow-md shadow-indigo-600/10' : 'text-slate-400 hover:text-slate-200'}`}
             >
               Register
             </button>
@@ -74,7 +74,7 @@ export default function LoginPage() {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-650 text-xs flex items-center gap-2">
+              <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
@@ -83,39 +83,39 @@ export default function LoginPage() {
             )}
 
             {!isLogin && (
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-600">Name</label>
+              <div className="space-y-1.5 text-left">
+                <label className="text-xs font-semibold text-slate-300">Name</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="John Doe"
-                  className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-600 transition-colors text-sm"
+                  className="w-full px-4 py-3 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all text-base md:text-sm"
                   required={!isLogin}
                 />
               </div>
             )}
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-600">Email Address</label>
+            <div className="space-y-1.5 text-left">
+              <label className="text-xs font-semibold text-slate-300">Email Address</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@company.com"
-                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-600 transition-colors text-sm"
+                className="w-full px-4 py-3 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all text-base md:text-sm"
                 required
               />
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-600">Password</label>
+            <div className="space-y-1.5 text-left">
+              <label className="text-xs font-semibold text-slate-300">Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-600 transition-colors text-sm"
+                className="w-full px-4 py-3 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all text-base md:text-sm"
                 required
               />
             </div>
@@ -123,7 +123,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={formLoading}
-              className="w-full py-3 mt-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:from-indigo-800 disabled:to-purple-800 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed text-sm"
+              className="w-full py-3 mt-4 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-650 disabled:from-indigo-850 disabled:to-indigo-900 text-white font-semibold rounded-xl transition-all duration-300 shadow-md shadow-indigo-600/10 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed text-sm"
             >
               {formLoading ? (
                 <>

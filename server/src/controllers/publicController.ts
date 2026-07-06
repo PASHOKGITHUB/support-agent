@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { Chat } from '../models/Chat.js';
 import { SupportConfig } from '../models/SupportConfig.js';
 import { Company } from '../models/Company.js';
+import { Chunk } from '../models/Chunk.js';
 import { retrieveContext } from '../services/ragService.js';
 import { generateChatResponseStream, condenseSearchQuery } from '../services/aiService.js';
 import mongoose from 'mongoose';
@@ -96,6 +97,94 @@ export const sendPublicMessage = async (req: Request, res: Response) => {
     }
 
     const companyIdStr = chat.companyId?.toString();
+
+    // Check if the user's message is a greeting
+    const normalizedText = text.trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "");
+    const greetingKeywords = ['hi', 'hello', 'hey', 'hola', 'greetings', 'hi there', 'hello there', 'good morning', 'good afternoon', 'good evening', 'wassup', 'yo'];
+    const isGreeting = greetingKeywords.some(keyword => normalizedText === keyword || normalizedText.startsWith(keyword + ' '));
+
+    if (isGreeting) {
+      // 1. Fetch support config
+      let support = await SupportConfig.findOne({ companyId: chat.companyId });
+      if (!support) {
+        support = new SupportConfig({
+          companyName: 'Support Assistant',
+          supportEmail: 'support@example.com',
+          workingHours: '9:00 AM - 5:00 PM (Mon-Fri)'
+        });
+      }
+
+      // 2. Fetch up to 6 text chunks from the company's uploaded documents
+      const chunks = await Chunk.find({ companyId: chat.companyId }).limit(6).select('text');
+      const contextText = chunks.length > 0
+        ? chunks.map((c) => c.text).join('\n\n')
+        : 'NO APPLICABLE KNOWLEDGE BASE DOCUMENTS ARE UPLOADED YET.';
+
+      const systemInstruction = `
+You are a professional AI customer support assistant for "${support.companyName}".
+The user has just greeted you.
+
+STRICT RESPONSE RULES:
+1. Respond to the user's greeting and ask how you can help them (e.g. "Hello! How can I help you today?").
+2. Underneath the greeting, offer 3 suggested questions or topics they can ask about, based strictly on the details provided in the "Knowledge Base Context" section below.
+3. Present these suggestions as bullet points starting with a dash (-). Write short, specific, actionable questions that can be answered by the context, for example:
+   "Here are a few things you can ask me about:
+   - What is the company return policy?
+   - How do I connect to a support phone line?
+   - What are the working hours?"
+4. If the provided context is empty or contains no document text, simply greet them and ask how you can assist:
+   "Hello! How can I help you today? Please ask me any questions about our services."
+5. Never invent suggestions that cannot be answered using the facts in the context.
+6. Do NOT include, mention, or output any source names, document filenames, or citations (such as "[Source X]") in your response.
+7. Under no circumstances should you output any JSON, code, or markers. Answer in natural, clean sentences only.
+
+Knowledge Base Context:
+----------------------------------------
+${contextText}
+----------------------------------------
+`;
+
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      res.flushHeaders();
+
+      let fullResponseText = '';
+      await generateChatResponseStream(
+        text,
+        systemInstruction,
+        (chunk) => {
+          fullResponseText += chunk;
+          res.write(`data: ${JSON.stringify({ chunk })}\n\n`);
+        }
+      );
+
+      const userMsg = {
+        sender: 'user' as const,
+        text: text,
+        createdAt: new Date()
+      };
+
+      const assistantMsg = {
+        sender: 'assistant' as const,
+        text: fullResponseText,
+        citations: [],
+        createdAt: new Date()
+      };
+
+      chat.messages.push(userMsg);
+      chat.messages.push(assistantMsg);
+
+      if (chat.messages.length <= 2 && chat.title === 'Guest Conversation') {
+        chat.title = text.length > 40 ? text.substring(0, 40) + '...' : text;
+      }
+
+      await chat.save();
+
+      res.write('data: [DONE]\n\n');
+      res.end();
+      return;
+    }
 
     // Condense user query using recent chat history
     const recentHistory = chat.messages.slice(-5);

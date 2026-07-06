@@ -209,7 +209,7 @@ function EmbedChatContent() {
 
   if (loading) {
     return (
-      <div className="flex h-screen w-full bg-slate-900 text-slate-100 items-center justify-center">
+      <div className="flex h-screen h-[100dvh] w-full bg-slate-950 text-slate-100 items-center justify-center">
         <svg className="animate-spin h-6 w-6 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
@@ -219,18 +219,18 @@ function EmbedChatContent() {
   }
 
   return (
-    <div className="flex flex-col h-screen w-full bg-slate-50 text-slate-800 overflow-hidden font-sans border-0">
+    <div className="flex flex-col h-screen h-[100dvh] w-full bg-slate-50 text-slate-800 overflow-hidden font-sans border-0">
       {/* Widget Header */}
       <div className="px-4 py-3 bg-gradient-to-r from-indigo-650 to-purple-650 text-white flex items-center justify-between shrink-0 shadow-sm">
         <div className="flex items-center gap-2">
           <div className="w-2.5 h-2.5 rounded-full bg-emerald-450 animate-pulse" />
           <div>
-            <h1 className="text-xs font-bold truncate max-w-[200px]">{companyName} Support</h1>
-            <p className="text-[9px] text-indigo-150">AI Customer Agent</p>
+            <h1 className="text-sm sm:text-xs font-bold truncate max-w-[200px]">{companyName} Support</h1>
+            <p className="text-[10px] sm:text-[9px] text-indigo-150">AI Customer Agent</p>
           </div>
         </div>
         {supportConfig?.supportEmail && (
-          <span className="text-[9px] bg-white/10 px-2 py-0.5 rounded-full font-medium">
+          <span className="text-[10px] sm:text-[9px] bg-white/10 px-2 py-0.5 rounded-full font-medium">
             Online
           </span>
         )}
@@ -245,8 +245,8 @@ function EmbedChatContent() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
             </div>
-            <h2 className="text-xs font-bold text-slate-700">Hi there! 👋</h2>
-            <p className="text-slate-500 text-[10px] max-w-[220px] mt-1 leading-normal">
+            <h2 className="text-sm sm:text-xs font-bold text-slate-700">Hi there! 👋</h2>
+            <p className="text-slate-550 text-xs sm:text-[10px] max-w-[240px] mt-1 leading-normal">
               Ask me anything about our services. I search our official documentation to assist you.
             </p>
           </div>
@@ -257,7 +257,7 @@ function EmbedChatContent() {
           return (
             <div key={index} className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
               <div
-                className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-[11px] leading-relaxed ${isUser
+                className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-sm sm:text-xs leading-relaxed ${isUser
                     ? 'bg-indigo-600 text-white rounded-tr-none'
                     : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none shadow-sm'
                   }`}
@@ -270,7 +270,7 @@ function EmbedChatContent() {
 
         {streamingText && (
           <div className="flex flex-col items-start">
-            <div className="max-w-[85%] px-4 py-2.5 rounded-2xl rounded-tl-none bg-white border border-slate-200 text-slate-800 text-[11px] leading-relaxed shadow-sm">
+            <div className="max-w-[85%] px-4 py-2.5 rounded-2xl rounded-tl-none bg-white border border-slate-200 text-slate-800 text-sm sm:text-xs leading-relaxed shadow-sm">
               <p className="whitespace-pre-wrap">{streamingText}</p>
               <span className="inline-block h-3.5 w-1 bg-indigo-600 animate-pulse ml-0.5" />
             </div>
@@ -286,7 +286,7 @@ function EmbedChatContent() {
         )}
 
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 text-red-650 rounded-xl text-[10px] leading-normal flex items-start gap-1">
+          <div className="p-3 bg-red-50 border border-red-200 text-red-650 rounded-xl text-xs sm:text-[10px] leading-normal flex items-start gap-1">
             <span className="shrink-0 font-bold mt-0.5">⚠️</span>
             <span>{error}</span>
           </div>
@@ -297,9 +297,9 @@ function EmbedChatContent() {
 
       {/* Helpful rating (Thumbs feedback) - Only show if chat has messages and not loading */}
       {messages.length > 0 && !sending && !streamingText && (
-        <div className="px-4 py-1.5 bg-slate-100 border-t border-slate-250 flex items-center justify-between text-[10px] shrink-0 text-slate-500">
+        <div className="px-4 py-2 bg-slate-100 border-t border-slate-250 flex items-center justify-between text-xs sm:text-[10px] shrink-0 text-slate-500">
           <span>Was this helpful?</span>
-          <div className="flex gap-2.5">
+          <div className="flex gap-3">
             <button
               onClick={() => handleFeedback('helpful')}
               disabled={feedbackSaved !== null}
@@ -326,7 +326,7 @@ function EmbedChatContent() {
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             placeholder="Type your question..."
-            className="flex-1 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-450 focus:outline-none focus:border-indigo-650 transition-colors text-[11px] font-medium"
+            className="flex-1 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-650 transition-colors text-base sm:text-xs font-medium"
             disabled={sending || !chatSessionId}
           />
           <button
@@ -347,7 +347,7 @@ function EmbedChatContent() {
 export default function EmbedChatPage() {
   return (
     <React.Suspense fallback={
-      <div className="flex h-screen w-full bg-slate-900 text-slate-100 items-center justify-center">
+      <div className="flex h-screen h-[100dvh] w-full bg-slate-950 text-slate-100 items-center justify-center">
         <svg className="animate-spin h-6 w-6 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />

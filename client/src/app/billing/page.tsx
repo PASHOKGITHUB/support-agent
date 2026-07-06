@@ -69,7 +69,7 @@ export default function BillingPage() {
         'Branded custom widget styling',
         'Email escalation fallback'
       ],
-      color: 'border-slate-250 bg-white text-slate-800 relative',
+      color: 'border-slate-250 bg-white text-slate-800',
       btnStyle: 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md'
     },
     {
@@ -84,7 +84,7 @@ export default function BillingPage() {
         'Advanced Dashboard Analytics',
         'Custom widget styling & options'
       ],
-      color: 'border-indigo-200 bg-indigo-50/30 text-slate-800 relative ring-2 ring-indigo-600 ring-offset-2',
+      color: 'border-indigo-200 bg-indigo-50/30 text-slate-800 ring-2 ring-indigo-600 ring-offset-2',
       btnStyle: 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md'
     },
     {
@@ -163,7 +163,7 @@ export default function BillingPage() {
               {plans.map((plan) => {
                 const isActive = plan.name.toLowerCase() === currentPlan.toLowerCase();
                 return (
-                  <div key={plan.name} className={`p-6 rounded-3xl border shadow-sm flex flex-col justify-between ${plan.color}`}>
+                  <div key={plan.name} className={`relative p-6 rounded-3xl border shadow-sm flex flex-col justify-between ${plan.color}`}>
                     {isActive && (
                       <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-indigo-600 text-white rounded-full text-[9px] font-bold tracking-wider uppercase">
                         Current Active

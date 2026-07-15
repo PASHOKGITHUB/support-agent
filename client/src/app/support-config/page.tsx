@@ -14,6 +14,7 @@ export default function SupportConfigPage() {
   const [supportWebsite, setSupportWebsite] = useState('');
   const [contactFormLink, setContactFormLink] = useState('');
   const [workingHours, setWorkingHours] = useState('');
+  const [logo, setLogo] = useState('');
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -39,6 +40,7 @@ export default function SupportConfigPage() {
           setWorkingHours(data.workingHours || '');
           setCompanyPlan(data.companyPlan || 'Free');
           setExpiresAt(data.expiresAt || null);
+          setLogo(data.logo || '');
         }
       } catch (err) {
         console.error(err);
@@ -50,6 +52,29 @@ export default function SupportConfigPage() {
 
     fetchConfig();
   }, []);
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      setError('Logo file size must be less than 2MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setLogo(reader.result as string);
+    };
+    reader.onerror = () => {
+      setError('Failed to read logo file.');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveLogo = () => {
+    setLogo('');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,7 +89,8 @@ export default function SupportConfigPage() {
         supportPhone,
         supportWebsite,
         contactFormLink,
-        workingHours
+        workingHours,
+        logo
       });
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
@@ -118,6 +144,47 @@ export default function SupportConfigPage() {
         ) : (
           <div className="max-w-2xl p-8 rounded-3xl bg-white border border-slate-200 shadow-sm">
             <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Logo Upload Section */}
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col sm:flex-row items-center gap-4">
+                <div className="relative w-16 h-16 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-center overflow-hidden shrink-0">
+                  {logo ? (
+                    <img src={logo} alt="Brand Logo Preview" className="w-full h-full object-contain p-1" />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-slate-400">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 text-center sm:text-left space-y-1">
+                  <h3 className="text-xs font-bold text-slate-800">Company Logo</h3>
+                  <p className="text-[10px] text-slate-500">
+                    Recommended: Square image, max 2MB (PNG, JPG, SVG, WebP). Used as the chat assistant avatar.
+                  </p>
+                  <div className="flex flex-wrap justify-center sm:justify-start gap-2 pt-1">
+                    <label className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-650 text-[10px] font-bold rounded-lg cursor-pointer transition-all border border-indigo-200/50">
+                      Upload Image
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoChange}
+                        className="hidden"
+                      />
+                    </label>
+                    {logo && (
+                      <button
+                        type="button"
+                        onClick={handleRemoveLogo}
+                        className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-650 text-[10px] font-bold rounded-lg cursor-pointer transition-all border border-red-200/50"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {/* Company Name */}
                 <div className="space-y-1.5">

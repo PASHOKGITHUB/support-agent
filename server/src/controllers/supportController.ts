@@ -48,7 +48,7 @@ export const getSupportConfig = async (req: AuthRequest, res: Response) => {
 };
 
 export const updateSupportConfig = async (req: AuthRequest, res: Response) => {
-  const { companyName, supportEmail, supportPhone, supportWebsite, contactFormLink, workingHours } = req.body;
+  const { companyName, supportEmail, supportPhone, supportWebsite, contactFormLink, workingHours, logo } = req.body;
 
   try {
     if (!companyName || !supportEmail) {
@@ -63,7 +63,8 @@ export const updateSupportConfig = async (req: AuthRequest, res: Response) => {
       supportPhone,
       supportWebsite,
       contactFormLink,
-      workingHours
+      workingHours,
+      logo
     };
 
     // Find and update, or insert if it doesn't exist

@@ -8,6 +8,7 @@ export interface ISupportConfig extends MongooseDocument {
   supportWebsite?: string;
   contactFormLink?: string;
   workingHours?: string;
+  logo?: string;
   createdAt: Date;
 }
 
@@ -19,6 +20,7 @@ const SupportConfigSchema = new Schema<ISupportConfig>({
   supportWebsite: { type: String },
   contactFormLink: { type: String },
   workingHours: { type: String, default: '9:00 AM - 5:00 PM (Mon-Fri)' },
+  logo: { type: String },
   createdAt: { type: Date, default: Date.now }
 });
 

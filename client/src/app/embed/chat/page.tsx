@@ -222,8 +222,20 @@ function EmbedChatContent() {
     <div className="flex flex-col h-screen h-[100dvh] w-full bg-slate-50 text-slate-800 overflow-hidden font-sans border-0">
       {/* Widget Header */}
       <div className="px-4 py-3 bg-gradient-to-r from-indigo-650 to-purple-650 text-white flex items-center justify-between shrink-0 shadow-sm">
-        <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-emerald-450 animate-pulse" />
+        <div className="flex items-center gap-2.5">
+          {supportConfig?.logo ? (
+            <div className="relative shrink-0">
+              <img src={supportConfig.logo} alt={`${companyName} Logo`} className="w-8 h-8 rounded-xl object-contain p-0.5 bg-white border border-white/10" />
+              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-450 border border-indigo-650 animate-pulse" />
+            </div>
+          ) : (
+            <div className="relative shrink-0">
+              <div className="w-8 h-8 rounded-xl bg-white/15 border border-white/10 flex items-center justify-center font-bold text-sm">
+                {companyName.charAt(0).toUpperCase()}
+              </div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-450 border border-indigo-650 animate-pulse" />
+            </div>
+          )}
           <div>
             <h1 className="text-sm sm:text-xs font-bold truncate max-w-[200px]">{companyName} Support</h1>
             <p className="text-[10px] sm:text-[9px] text-indigo-150">AI Customer Agent</p>
@@ -240,11 +252,15 @@ function EmbedChatContent() {
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/50">
         {messages.length === 0 && !streamingText && (
           <div className="h-full flex flex-col items-center justify-center text-center px-4 opacity-80">
-            <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl mb-3">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-              </svg>
-            </div>
+            {supportConfig?.logo ? (
+              <img src={supportConfig.logo} alt={`${companyName} Logo`} className="w-14 h-14 rounded-2xl object-contain p-1 bg-white shadow-md border border-slate-200 mb-3" />
+            ) : (
+              <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+              </div>
+            )}
             <h2 className="text-sm sm:text-xs font-bold text-slate-700">Hi there! 👋</h2>
             <p className="text-slate-550 text-xs sm:text-[10px] max-w-[240px] mt-1 leading-normal">
               Ask me anything about our services. I search our official documentation to assist you.
@@ -255,9 +271,20 @@ function EmbedChatContent() {
         {messages.map((msg, index) => {
           const isUser = msg.sender === 'user';
           return (
-            <div key={index} className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
+            <div key={index} className={`flex gap-2 ${isUser ? 'justify-end' : 'justify-start'}`}>
+              {!isUser && (
+                <div className="w-6 h-6 rounded-lg overflow-hidden bg-white border border-slate-200 flex-shrink-0 mt-1 flex items-center justify-center">
+                  {supportConfig?.logo ? (
+                    <img src={supportConfig.logo} alt="Logo" className="w-full h-full object-contain p-0.5" />
+                  ) : (
+                    <div className="text-[10px] font-bold text-indigo-600 bg-indigo-50 w-full h-full flex items-center justify-center">
+                      {companyName.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+              )}
               <div
-                className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-sm sm:text-xs leading-relaxed ${isUser
+                className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm sm:text-xs leading-relaxed ${isUser
                     ? 'bg-indigo-600 text-white rounded-tr-none'
                     : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none shadow-sm'
                   }`}
@@ -269,8 +296,17 @@ function EmbedChatContent() {
         })}
 
         {streamingText && (
-          <div className="flex flex-col items-start">
-            <div className="max-w-[85%] px-4 py-2.5 rounded-2xl rounded-tl-none bg-white border border-slate-200 text-slate-800 text-sm sm:text-xs leading-relaxed shadow-sm">
+          <div className="flex gap-2 justify-start">
+            <div className="w-6 h-6 rounded-lg overflow-hidden bg-white border border-slate-200 flex-shrink-0 mt-1 flex items-center justify-center">
+              {supportConfig?.logo ? (
+                <img src={supportConfig.logo} alt="Logo" className="w-full h-full object-contain p-0.5" />
+              ) : (
+                <div className="text-[10px] font-bold text-indigo-600 bg-indigo-50 w-full h-full flex items-center justify-center">
+                  {companyName.charAt(0).toUpperCase()}
+                </div>
+              )}
+            </div>
+            <div className="max-w-[80%] px-4 py-2.5 rounded-2xl rounded-tl-none bg-white border border-slate-200 text-slate-800 text-sm sm:text-xs leading-relaxed shadow-sm">
               <p className="whitespace-pre-wrap">{streamingText}</p>
               <span className="inline-block h-3.5 w-1 bg-indigo-600 animate-pulse ml-0.5" />
             </div>
@@ -278,10 +314,21 @@ function EmbedChatContent() {
         )}
 
         {sending && !streamingText && (
-          <div className="flex items-center gap-1 bg-white border border-slate-200 py-2.5 px-3.5 rounded-xl rounded-tl-none w-16 justify-center shadow-sm">
-            <span className="w-1 h-1 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-            <span className="w-1 h-1 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-            <span className="w-1 h-1 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+          <div className="flex gap-2 justify-start">
+            <div className="w-6 h-6 rounded-lg overflow-hidden bg-white border border-slate-200 flex-shrink-0 mt-1 flex items-center justify-center">
+              {supportConfig?.logo ? (
+                <img src={supportConfig.logo} alt="Logo" className="w-full h-full object-contain p-0.5" />
+              ) : (
+                <div className="text-[10px] font-bold text-indigo-600 bg-indigo-50 w-full h-full flex items-center justify-center">
+                  {companyName.charAt(0).toUpperCase()}
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-1 bg-white border border-slate-200 py-2.5 px-3.5 rounded-xl rounded-tl-none w-16 justify-center shadow-sm">
+              <span className="w-1 h-1 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="w-1 h-1 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-1 h-1 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            </div>
           </div>
         )}
 

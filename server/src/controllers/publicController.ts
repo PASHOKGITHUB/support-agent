@@ -33,6 +33,7 @@ export const getPublicSupportConfig = async (req: Request, res: Response) => {
         companyName: company.name,
         supportEmail: 'support@example.com',
         workingHours: '9:00 AM - 5:00 PM (Mon-Fri)',
+        logo: null,
         createdAt: new Date(),
         updatedAt: new Date()
       });

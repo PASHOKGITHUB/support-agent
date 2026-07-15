@@ -394,7 +394,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <BrandLogo className="h-9 w-9" />
+              <BrandLogo className="h-9 w-auto max-w-[100px]" />
               <span className="text-lg font-extrabold text-white">Invaccs Agent</span>
             </div>
             <p className="text-xs text-slate-450 leading-relaxed font-medium">

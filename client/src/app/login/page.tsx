@@ -43,7 +43,7 @@ export default function LoginPage() {
         {/* Logo/Branding Header */}
         <div className="text-center mb-8 flex flex-col items-center">
           <div className="mb-4">
-            <BrandLogo className="h-10 w-10" />
+            <BrandLogo className="h-10 w-auto max-w-[120px]" />
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-slate-300">
             Invaccs Agent

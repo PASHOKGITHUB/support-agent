@@ -91,7 +91,7 @@ export default function Sidebar() {
       {/* Mobile Sticky Top Header */}
       <div className="md:hidden flex items-center justify-between px-6 py-4 bg-white border-b border-slate-200/80 fixed top-0 left-0 right-0 z-40 h-16">
         <div className="flex items-center gap-3">
-          <BrandLogo className="h-7 w-7" />
+          <BrandLogo className="h-7 w-auto max-w-[80px]" />
           <span className="font-bold text-slate-800 text-base tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
             Invaccs Agent
           </span>
@@ -123,7 +123,7 @@ export default function Sidebar() {
         {/* Header Block / Brand Logo */}
         <div className="p-6 border-b border-slate-100 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <BrandLogo className="h-8 w-8" />
+            <BrandLogo className="h-8 w-auto max-w-[90px]" />
             <span className="font-bold text-slate-800 text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
               Invaccs Agent
             </span>

@@ -89,16 +89,13 @@ export default function Sidebar() {
   return (
     <>
       {/* Mobile Sticky Top Header */}
-      <div className="md:hidden flex items-center justify-between px-6 py-4 bg-white border-b border-slate-200/80 fixed top-0 left-0 right-0 z-40 h-16">
-        <div className="flex items-center gap-3">
-          <BrandLogo className="h-7 w-auto max-w-[80px]" />
-          <span className="font-bold text-slate-800 text-base tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
-            Invaccs Agent
-          </span>
+      <div className="md:hidden flex items-center justify-center px-6 py-4 bg-white border-b border-slate-200/80 fixed top-0 left-0 right-0 z-40 h-16">
+        <div className="flex items-center justify-center flex-1">
+          <BrandLogo className="h-10 w-auto max-w-[130px]" />
         </div>
         <button
           onClick={() => setIsOpen(true)}
-          className="p-1.5 text-slate-500 hover:text-slate-850 hover:bg-slate-50 rounded-lg focus:outline-none transition-colors cursor-pointer"
+          className="absolute right-6 p-1.5 text-slate-500 hover:text-slate-850 hover:bg-slate-50 rounded-lg focus:outline-none transition-colors cursor-pointer"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -116,21 +113,17 @@ export default function Sidebar() {
 
       {/* Sidebar Container */}
       <aside
-        className={`w-64 border-r border-slate-200/80 bg-white flex flex-col h-screen fixed md:sticky top-0 left-0 z-50 shrink-0 transition-transform duration-300 ease-in-out md:translate-x-0 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`w-64 border-r border-slate-200/80 bg-white flex flex-col h-screen fixed md:sticky top-0 left-0 z-50 shrink-0 transition-transform duration-300 ease-in-out md:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
       >
         {/* Header Block / Brand Logo */}
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <BrandLogo className="h-8 w-auto max-w-[90px]" />
-            <span className="font-bold text-slate-800 text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
-              Invaccs Agent
-            </span>
+        <div className="px-6 pt-5 pb-3 border-b border-slate-100 flex items-center justify-center relative">
+          <div className="flex items-center justify-center w-full">
+            <BrandLogo className="h-12 w-auto max-w-[160px]" />
           </div>
           <button
             onClick={() => setIsOpen(false)}
-            className="md:hidden p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg focus:outline-none cursor-pointer"
+            className="md:hidden absolute right-4 p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg focus:outline-none cursor-pointer"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -139,7 +132,7 @@ export default function Sidebar() {
         </div>
 
         {/* Menu Links */}
-        <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
+        <nav className="flex-1 px-4 pt-3 pb-6 space-y-1.5 overflow-y-auto">
           {menuItems.map((item) => {
             const isActive = pathname === item.path || (item.path !== '/dashboard' && pathname.startsWith(item.path));
             return (

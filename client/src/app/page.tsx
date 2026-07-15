@@ -110,7 +110,7 @@ export default function LandingPage() {
           {/* Interactive Interface Preview */}
           <div className="w-full max-w-5xl mt-16 p-2 bg-slate-900/35 border border-slate-800/80 rounded-3xl backdrop-blur-md shadow-2xl relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/5 via-purple-500/2 to-transparent pointer-events-none" />
-            
+
             {/* Terminal Top Window Header */}
             <div className="flex items-center justify-between px-5 py-3 border-b border-slate-800/80 text-xs text-slate-400 font-semibold font-mono">
               <div className="flex gap-2">
@@ -127,7 +127,7 @@ export default function LandingPage() {
 
             {/* Split Screen Panel */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-px bg-slate-900/80">
-              
+
               {/* Left Column: Console Sidebar / Doc Status (4 cols) */}
               <div className="lg:col-span-4 p-5 space-y-5 bg-slate-950/40 text-left">
                 <div className="space-y-1.5">
@@ -186,7 +186,7 @@ export default function LandingPage() {
                         <div className="bg-indigo-950/30 border border-indigo-900/50 text-indigo-100 px-4 py-3 rounded-2xl rounded-tl-sm shadow-md leading-relaxed font-medium">
                           Grounded on <strong className="text-white">branding-guide.md</strong>: You can specify custom themes in the console settings under Support Config. The scripts automatically inject this configuration, adjusting the floating icon and chat headers instantly.
                         </div>
-                        
+
                         {/* Grounding Source Info */}
                         <div className="flex flex-wrap md:inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-900/80 border border-slate-850 rounded-lg text-[10px] text-slate-400 font-semibold font-mono">
                           <span className="text-indigo-400 shrink-0">🔍 Source:</span>
@@ -319,10 +319,10 @@ export default function LandingPage() {
                   <pre className="text-slate-300 mt-1 pl-2 border-l border-indigo-900/30">
                     <span className="text-slate-500">&lt;</span><span className="text-indigo-400">script</span><span className="text-slate-500">&gt;</span>{`
   `}window.<span className="text-indigo-300">SupportAgentConfig</span> = {`{`}
-    companyId: <span className="text-emerald-400">"your-workspace-hash"</span>,
-    origin: <span className="text-emerald-400">"https://supportagent.ai"</span>
-  {`};`}
-<span className="text-slate-500">&lt;/</span><span className="text-indigo-400">script</span><span className="text-slate-500">&gt;</span>
+                    companyId: <span className="text-emerald-400">"your-workspace-hash"</span>,
+                    origin: <span className="text-emerald-400">"https://supportagent.ai"</span>
+                    {`};`}
+                    <span className="text-slate-500">&lt;/</span><span className="text-indigo-400">script</span><span className="text-slate-500">&gt;</span>
                   </pre>
                 </div>
                 <div className="pt-2">

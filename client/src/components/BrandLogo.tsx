@@ -6,8 +6,8 @@ interface BrandLogoProps {
 
 export const BrandLogo = ({ className = 'h-9 w-9' }: BrandLogoProps) => (
   <img 
-    src="/logo.png" 
-    alt="SupportAgent.ai Logo" 
+    src="/invaccs.jpeg" 
+    alt="Invaccs Logo" 
     className={`${className} object-contain`}
   />
 );

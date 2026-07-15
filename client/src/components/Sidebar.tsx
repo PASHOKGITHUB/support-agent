@@ -93,7 +93,7 @@ export default function Sidebar() {
         <div className="flex items-center gap-3">
           <BrandLogo className="h-7 w-7" />
           <span className="font-bold text-slate-800 text-base tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
-            SupportAgent.ai
+            Invaccs Agent
           </span>
         </div>
         <button
@@ -125,7 +125,7 @@ export default function Sidebar() {
           <div className="flex items-center gap-3">
             <BrandLogo className="h-8 w-8" />
             <span className="font-bold text-slate-800 text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
-              SupportAgent.ai
+              Invaccs Agent
             </span>
           </div>
           <button

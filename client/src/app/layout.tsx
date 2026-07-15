@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SupportAgent.ai — AI Customer Support Platform",
+  title: "Invaccs Agent — AI Customer Support Platform",
   description: "Upload business documents, set escalation fallbacks, and chat with an accurate, hallucination-free AI assistant.",
 };
 

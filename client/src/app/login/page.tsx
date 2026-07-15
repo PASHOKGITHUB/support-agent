@@ -46,7 +46,7 @@ export default function LoginPage() {
             <BrandLogo className="h-10 w-10" />
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-slate-300">
-            SupportAgent.ai
+            Invaccs Agent
           </h1>
           <p className="text-slate-400 mt-2 text-sm font-medium">
             AI-powered customer support grounding platform

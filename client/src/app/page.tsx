@@ -51,7 +51,7 @@ export default function LandingPage() {
             <BrandLogo />
             <div>
               <span className="text-lg font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-slate-300">
-                SupportAgent.ai
+                Invaccs Agent
               </span>
               <p className="text-[10px] text-slate-400 font-bold tracking-wider uppercase">Enterprise SaaS Platform</p>
             </div>
@@ -118,7 +118,7 @@ export default function LandingPage() {
                 <span className="w-3 h-3 rounded-full bg-yellow-500/30 border border-yellow-500/20" />
                 <span className="w-3 h-3 rounded-full bg-emerald-500/30 border border-emerald-500/20" />
               </div>
-              <span className="text-slate-300 font-medium">SupportAgent.ai — Interactive Console Mockup</span>
+              <span className="text-slate-300 font-medium">Invaccs Agent — Interactive Console Mockup</span>
               <div className="flex items-center gap-1.5 text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full text-[10px]">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
                 <span>LIVE</span>
@@ -395,7 +395,7 @@ export default function LandingPage() {
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <BrandLogo className="h-9 w-9" />
-              <span className="text-lg font-extrabold text-white">SupportAgent.ai</span>
+              <span className="text-lg font-extrabold text-white">Invaccs Agent</span>
             </div>
             <p className="text-xs text-slate-450 leading-relaxed font-medium">
               Next-generation multi-tenant client support software powered by grounded vector contextual RAG indexing.
@@ -421,7 +421,7 @@ export default function LandingPage() {
         </div>
 
         <div className="max-w-7xl mx-auto px-6 py-6 border-t border-slate-900/50 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 gap-4">
-          <span>© {new Date().getFullYear()} SupportAgent.ai Inc. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} Invaccs Agent Inc. All rights reserved.</span>
         </div>
       </footer>
     </div>

@@ -20,8 +20,9 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
+const clientUrls = (process.env.CLIENT_URL || '').split(',').map(url => url.trim());
 const allowedOrigins = [
-  process.env.CLIENT_URL,
+  ...clientUrls,
   'http://localhost:3000',
   'http://localhost:5173'
 ].filter(Boolean) as string[];

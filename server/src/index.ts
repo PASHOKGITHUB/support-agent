@@ -20,8 +20,22 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  'http://localhost:3000',
+  'http://localhost:5173'
+].filter(Boolean) as string[];
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl, postman)
+    if (!origin) return callback(null, true);
+
+    // Dynamically allow any origin and echo it back.
+    // This allows credentials/cookies for the main admin console,
+    // and also allows the public widget to be embedded on any external client website.
+    return callback(null, true);
+  },
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
